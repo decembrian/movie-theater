@@ -13,9 +13,7 @@ import pdm.persistence.model.repository.CategoryRepository;
 import pdm.persistence.model.repository.FilmRepository;
 import pdm.persistence.model.repository.LanguageRepository;
 
-import java.sql.Date;
 import java.time.LocalDate;
-import java.util.Optional;
 
 @SpringBootApplication
 public class PersistenceDataJpaApplication {

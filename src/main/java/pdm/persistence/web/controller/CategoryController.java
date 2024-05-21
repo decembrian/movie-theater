@@ -4,29 +4,25 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import pdm.persistence.model.Category;
-import pdm.persistence.model.Film;
 import pdm.persistence.model.dto.CategoryDTO;
 import pdm.persistence.model.repository.CategoryRepository;
 import pdm.persistence.model.repository.FilmRepository;
-
-import org.springframework.hateoas.CollectionModel;
 import pdm.persistence.web.service.CategoryToDTOService;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-//TODO ЗАДОКУМЕНТИРОВАТЬ
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/v1")
@@ -53,20 +49,21 @@ public class CategoryController {
         Set<CategoryDTO> dtos = new HashSet<>();
 
         for(Category ctg: categories){
-            CategoryDTO dto = new CategoryDTO();
+            /*CategoryDTO dto = new CategoryDTO();
             dto.setCategoryId(ctg.getCategoryId());
             dto.setCategory(ctg.getCategory());
 
             Set<Long> filmIDs = ctg.getFilms().stream()
                     .map(Film::getFilmId)
                     .collect(Collectors.toSet());
-            dto.setFilmIds(filmIDs);
+            dto.setFilmIds(filmIDs);*/
+            CategoryDTO dto = toDTOService.getCategoryDTO(ctg.getCategoryId());
 
             dtos.add(dto);
 
             dto.add(linkTo(methodOn(getClass()).getCategoryById(ctg.getCategoryId())).withSelfRel());
             dto.add(linkTo(methodOn(getClass()).removeCategory(ctg.getCategoryId())).withRel("delete"));
-            //TODO ДОБАВИТЬ ССЫЛКУ НА ФИЛЬМЫ, ГДЕ КАТЕГОРИЯ ПРИСУТСТВУЕТ
+            dto.add(linkTo(methodOn(FilmController.class).getFilmsByCategoryId(ctg.getCategoryId())).withRel("films"));
         }
         return CollectionModel.of(dtos);
     }
@@ -81,14 +78,10 @@ public class CategoryController {
 
         dto.add(linkTo(methodOn(getClass()).getCategories()).withRel("categories"));
         dto.add(linkTo(methodOn(getClass()).getCategoryById(id)).withSelfRel());
+        dto.add(linkTo(methodOn(FilmController.class).getFilmsByCategoryId(dto.getCategoryId())).withRel("films"));
 
         return ResponseEntity.ok(dto);
     }
-
-    //TODO ДОБАВИТЬ ПОЛУЧЕНИЕ ДЛЯ ФИЛЬМОВ
-
-
-
 
     @PostMapping("/categories")
     @Operation(
@@ -99,6 +92,7 @@ public class CategoryController {
         Category category = new Category();
         category.setCategory(dto.getCategory());
 
+        //TODO проверка на существование в базе
         Category savedCategory = categoryRepository.save(category);
 
         final URI uri =
