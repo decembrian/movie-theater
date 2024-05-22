@@ -1,21 +1,7 @@
 package pdm.persistence;
 
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import pdm.persistence.model.Actor;
-import pdm.persistence.model.Category;
-import pdm.persistence.model.Film;
-import pdm.persistence.model.Language;
-import pdm.persistence.model.repository.ActorRepository;
-import pdm.persistence.model.repository.CategoryRepository;
-import pdm.persistence.model.repository.FilmRepository;
-import pdm.persistence.model.repository.LanguageRepository;
-
-import java.sql.Date;
-import java.time.LocalDate;
-import java.util.Optional;
 
 @SpringBootApplication
 public class PersistenceDataJpaApplication {
@@ -24,7 +10,7 @@ public class PersistenceDataJpaApplication {
         SpringApplication.run(PersistenceDataJpaApplication.class, args);
     }
 
-    @Bean
+    /*@Bean
     public CommandLineRunner demo(LanguageRepository repo, FilmRepository fRepo, CategoryRepository cRepo, ActorRepository actorRepository){
         return (args) -> {
             Language language = new Language();
@@ -63,5 +49,5 @@ public class PersistenceDataJpaApplication {
 
             System.out.println(repo.findById(2L));
         };
-    }
+    }*/
 }
