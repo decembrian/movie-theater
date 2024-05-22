@@ -9,8 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pdm.persistence.model.Film;
 import pdm.persistence.model.Language;
-import pdm.persistence.model.repository.ActorRepository;
-import pdm.persistence.model.repository.CategoryRepository;
 import pdm.persistence.model.repository.FilmRepository;
 import pdm.persistence.model.repository.LanguageRepository;
 
@@ -24,8 +22,7 @@ public class FilmController {
     private final FilmRepository filmRepository;
     private final LanguageRepository langRepository;
 
-    public FilmController(FilmRepository filmRepository, LanguageRepository langRepository,
-                          ActorRepository actorRepository, CategoryRepository categoryRepository) {
+    public FilmController(FilmRepository filmRepository, LanguageRepository langRepository) {
         this.filmRepository = filmRepository;
         this.langRepository = langRepository;
     }
@@ -63,7 +60,8 @@ public class FilmController {
     }
 
     //TODO ИЗМЕНИТЬ ВСЕ RESPONCE_ENTITY<STRING> НА НУЖНЫЕ СУЩНОСТИ
-
+    //TODO УДАЛЕНИЕ ЖАНРА ИЗ ФИЛЬМА
+    //TODO УДАЛЕНИЕ АКТЕРА ИЗ ФИЛЬМА
     @Operation(
             summary = "Добавить фильм.",
             description = "Добавление фильма в БД"

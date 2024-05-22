@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import pdm.persistence.model.Actor;
+import pdm.persistence.model.Film;
 import pdm.persistence.model.dto.ActorDTO;
 import pdm.persistence.model.repository.ActorRepository;
 import pdm.persistence.model.repository.FilmRepository;
@@ -82,7 +83,6 @@ public class ActorController {
             description = "Добавить нового актера в БД."
     )
     public ResponseEntity<EntityModel<Actor>> addActor(@RequestBody @Parameter(description = "Сущность Actor") Actor act){
-        //TODO проверка не существование в базе
         Actor actor = new Actor();
         actor.setFirstName(act.getFirstName());
         actor.setLastName(act.getLastName());
@@ -104,30 +104,28 @@ public class ActorController {
         return ResponseEntity.created(uri).body(model);
     }
 
+
     @PostMapping("/films/{filmId}/actors")
     @Operation(
             summary = "Добавить актера к фильму.",
             description = "Добавление существующего актера к фильму."
     )
-    public ResponseEntity<String> addActorToFilm(@RequestBody @Parameter(description = "Сущность Actor") Actor act,
+    public ResponseEntity<ActorDTO> addActorToFilm(@RequestBody @Parameter(description = "Сущность Actor") ActorDTO act,
                                                  @PathVariable("filmId") @Parameter(description = "ID фильма") Long id){
-        Actor actor = filmRepository.findById(id)
-                .map(film -> {
-                    long actor_id = act.getActor_id();
 
-                    if(actor_id != 0){
-                        Actor _act = actorRepository.findById(actor_id)
-                                .orElseThrow(() -> new EntityNotFoundException("Актерс c id = " + actor_id + "  не найден"));
-                        film.addActor(_act);
-                        filmRepository.save(film);
-                        return _act;
-                    }
-                    //TODO добавить HATEOAS ССЫЛКИ
-                    film.addActor(act);
-                    return actorRepository.save(act);
-                }).orElseThrow(() -> new EntityNotFoundException("Фильм с ID = " + id + " не найден."));
+        Film film = filmRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Фильм с ID = " + id + " не найден."));
 
-        return ResponseEntity.ok("Актер успешно добавлен к фильму.");
+        Actor actor = actorRepository.findById(act.getActorId())
+                .orElseThrow(() -> new EntityNotFoundException("Актер с ID = " + id + " не найден."));
+
+        film.addActor(actor);
+        filmRepository.save(film);
+
+        act.add(linkTo(methodOn(getClass()).getActors()).withRel("actors"));
+        act.add(linkTo(methodOn(getClass()).getActorById(act.getActorId())).withRel("get by id"));
+
+        return ResponseEntity.ok(act);
     }
 
     @DeleteMapping("/actors/{id}")
