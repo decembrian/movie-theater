@@ -7,12 +7,22 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pdm.persistence.model.Actor;
+import pdm.persistence.model.Category;
 import pdm.persistence.model.Film;
 import pdm.persistence.model.Language;
+import pdm.persistence.model.dto.ActorDTO;
+import pdm.persistence.model.dto.CategoryDTO;
+import pdm.persistence.model.repository.ActorRepository;
+import pdm.persistence.model.repository.CategoryRepository;
 import pdm.persistence.model.repository.FilmRepository;
 import pdm.persistence.model.repository.LanguageRepository;
 
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping(path = "/v1/films")
@@ -21,10 +31,15 @@ public class FilmController {
 
     private final FilmRepository filmRepository;
     private final LanguageRepository langRepository;
+    private final ActorRepository actorRepository;
+    private final CategoryRepository categoryRepository;
 
-    public FilmController(FilmRepository filmRepository, LanguageRepository langRepository) {
+    public FilmController(FilmRepository filmRepository, LanguageRepository langRepository,
+                          ActorRepository actorRepository, CategoryRepository categoryRepository) {
         this.filmRepository = filmRepository;
         this.langRepository = langRepository;
+        this.actorRepository = actorRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Operation(
@@ -47,7 +62,7 @@ public class FilmController {
         return filmRepository.findAll();
     }
 
-    //TODO ИЗМЕНИТЬ С FILM НА FILM_DTO
+
     @GetMapping("/categories/{id}")
     @Operation(
             summary = "Список фильмов по категории.",
@@ -59,9 +74,6 @@ public class FilmController {
         return ResponseEntity.ok().body(films);
     }
 
-    //TODO ИЗМЕНИТЬ ВСЕ RESPONCE_ENTITY<STRING> НА НУЖНЫЕ СУЩНОСТИ
-    //TODO УДАЛЕНИЕ ЖАНРА ИЗ ФИЛЬМА
-    //TODO УДАЛЕНИЕ АКТЕРА ИЗ ФИЛЬМА
     @Operation(
             summary = "Добавить фильм.",
             description = "Добавление фильма в БД"
@@ -92,5 +104,59 @@ public class FilmController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Фильм с ID = " + id + " не найден");
     }
     //TODO добавить возможность получения фильмов по категории/актеру (/v1/films/{id}/categories/{id}) / (/v1/films/{id}/actors/{id})
+
+    @DeleteMapping("/{filmId}/actors/{actorId}")
+    @Operation(
+            summary = "Удалить актера из фильма.",
+            description = "Удаление актера из фильма по filmId и actorId."
+    )
+    public ResponseEntity<ActorDTO> removeActorFromFilm(@PathVariable("filmId") @Parameter(description = "Фильм ID") Long filmId,
+                                                     @PathVariable("actorId") @Parameter(description = "ID актера") Long actorId){
+        if(!filmRepository.existsById(filmId))
+            throw new EntityNotFoundException("Фильм с ID =" + filmId + " не найден.");
+        else {
+                Actor actor = actorRepository.findById(actorId)
+                                .orElseThrow(() -> new EntityNotFoundException("Актер с ID =" + filmId + " не найден."));
+                ActorDTO dto = new ActorDTO();
+                dto.setActorId(actor.getActor_id());
+                dto.setFirstName(actor.getFirstName());
+                dto.setLastName(actor.getLastName());
+                dto.setFilmIDs(actor.getFilms().stream()
+                        .map(Film::getFilmId)
+                        .collect(Collectors.toSet()));
+
+                filmRepository.deleteActorByFilmIdAndActorId(filmId, actorId);
+
+                return ResponseEntity.status(HttpStatus.OK).body(dto);
+        }
+    }
+
+    @DeleteMapping("/{filmId}/categories/{categoryId}")
+    @Operation(
+            summary = "Удалить жанр из фильма.",
+            description = "Удаление жанра из фильма по filmId и categoryId."
+    )
+    public ResponseEntity<CategoryDTO> removeCategoryFromFilm(@PathVariable("filmId") Long filmId, @PathVariable("categoryId") Long categoryId){
+        if(!filmRepository.existsById(filmId))
+            throw new EntityNotFoundException("Фильм с ID =" + filmId + " не найден.");
+        else {
+            Category category = categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new EntityNotFoundException("Жанр с ID =" + filmId + " не найден."));
+            filmRepository.deleteCategoryByFilmIdAndCategoryId(filmId, categoryId);
+
+            CategoryDTO dto = new CategoryDTO();
+            dto.setCategoryId(category.getCategoryId());
+            dto.setCategory(category.getCategory());
+            dto.setFilmIds(category.getFilms().stream()
+                    .map(Film::getFilmId)
+                    .collect(Collectors.toSet()));
+
+            dto.add(linkTo(methodOn(CategoryController.class).getCategories()).withRel("categories"));
+            dto.add(linkTo(methodOn(CategoryController.class).getCategoryById(dto.getCategoryId())).withSelfRel());
+            dto.add(linkTo(methodOn(FilmController.class).getFilmsByCategoryId(dto.getCategoryId())).withRel("films"));
+
+            return ResponseEntity.status(HttpStatus.OK).body(dto);
+        }
+    }
 }
 
