@@ -2,8 +2,8 @@ package pdm.persistence.web.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
-import pdm.persistence.model.Actor;
-import pdm.persistence.model.Film;
+import pdm.persistence.model.entity.Actor;
+import pdm.persistence.model.entity.Film;
 import pdm.persistence.model.dto.ActorDTO;
 import pdm.persistence.model.repository.ActorRepository;
 
