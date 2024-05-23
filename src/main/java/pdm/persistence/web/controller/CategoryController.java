@@ -49,14 +49,6 @@ public class CategoryController {
         Set<CategoryDTO> dtos = new HashSet<>();
 
         for(Category ctg: categories){
-            /*CategoryDTO dto = new CategoryDTO();
-            dto.setCategoryId(ctg.getCategoryId());
-            dto.setCategory(ctg.getCategory());
-
-            Set<Long> filmIDs = ctg.getFilms().stream()
-                    .map(Film::getFilmId)
-                    .collect(Collectors.toSet());
-            dto.setFilmIds(filmIDs);*/
             CategoryDTO dto = toDTOService.getCategoryDTO(ctg.getCategoryId());
 
             dtos.add(dto);
@@ -92,7 +84,7 @@ public class CategoryController {
         Category category = new Category();
         category.setCategory(dto.getCategory());
 
-        //TODO проверка на существование в базе
+
         Category savedCategory = categoryRepository.save(category);
 
         final URI uri =
@@ -147,7 +139,6 @@ public class CategoryController {
     )
     public ResponseEntity<String> removeCategory(@PathVariable("id")@Parameter(description = "ID категории") Long id){
         if(categoryRepository.existsById(id)){
-            CategoryDTO dto = toDTOService.getCategoryDTO(id);
             categoryRepository.deleteById(id);
 
             return ResponseEntity.status(HttpStatus.OK).body("Категория с id = " + id + " была удалена.");
