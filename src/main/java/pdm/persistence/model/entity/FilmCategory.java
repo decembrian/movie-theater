@@ -1,4 +1,4 @@
-package pdm.persistence.model;
+package pdm.persistence.model.entity;
 
 import jakarta.persistence.*;
 

@@ -1,4 +1,4 @@
-package pdm.persistence.web.controller;
+package pdm.persistence.web.controller.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -7,10 +7,10 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pdm.persistence.model.Actor;
-import pdm.persistence.model.Category;
-import pdm.persistence.model.Film;
-import pdm.persistence.model.Language;
+import pdm.persistence.model.entity.Actor;
+import pdm.persistence.model.entity.Category;
+import pdm.persistence.model.entity.Film;
+import pdm.persistence.model.entity.Language;
 import pdm.persistence.model.dto.ActorDTO;
 import pdm.persistence.model.dto.CategoryDTO;
 import pdm.persistence.model.repository.ActorRepository;
@@ -136,7 +136,8 @@ public class FilmController {
             summary = "Удалить жанр из фильма.",
             description = "Удаление жанра из фильма по filmId и categoryId."
     )
-    public ResponseEntity<CategoryDTO> removeCategoryFromFilm(@PathVariable("filmId") Long filmId, @PathVariable("categoryId") Long categoryId){
+    public ResponseEntity<CategoryDTO> removeCategoryFromFilm(@PathVariable("filmId") @Parameter(description = "Фильм ID") Long filmId,
+                                                              @PathVariable("categoryId") @Parameter(description = "ID жанра")  Long categoryId){
         if(!filmRepository.existsById(filmId))
             throw new EntityNotFoundException("Фильм с ID =" + filmId + " не найден.");
         else {

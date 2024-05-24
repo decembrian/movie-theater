@@ -1,4 +1,4 @@
-package pdm.persistence.web.controller;
+package pdm.persistence.web.controller.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,8 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
-import pdm.persistence.model.Actor;
-import pdm.persistence.model.Film;
+import pdm.persistence.model.entity.Actor;
+import pdm.persistence.model.entity.Film;
 import pdm.persistence.model.dto.ActorDTO;
 import pdm.persistence.model.repository.ActorRepository;
 import pdm.persistence.model.repository.FilmRepository;
@@ -66,13 +66,14 @@ public class ActorController {
             description = "Извлечение из БД актера по его ID."
     )
     public ResponseEntity<ActorDTO> getActorById(@PathVariable("id") Long id){
+        Actor actor = actorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Актер с Id = " + id + " не найден."));
         ActorDTO dto = actorService.getActorDTO(id);
 
         dto.add(linkTo(methodOn(getClass()).getActors()).withRel("actors"));
         dto.add(linkTo(methodOn(getClass()).getActorById(dto.getActorId())).withSelfRel());
         //TODO ссылка на /films/{id}/actors/{id}
 
-        //TODO обработка неудачного сохранения
         return ResponseEntity.ok(dto);
     }
 

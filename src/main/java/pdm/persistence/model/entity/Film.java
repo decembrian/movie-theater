@@ -1,5 +1,6 @@
-package pdm.persistence.model;
+package pdm.persistence.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -13,6 +14,7 @@ import java.util.Set;
 public class Film implements Serializable{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "film_id")
     private Long filmId;
     private String title;
     private String description;
@@ -41,6 +43,10 @@ public class Film implements Serializable{
             inverseJoinColumns = @JoinColumn(name = "actor_id")
     )
     private Set<Actor> actors = new HashSet<>();
+
+    @OneToMany(mappedBy = "scheduleFilm")
+    @JsonIgnore
+    private Set<Inventory> filmInventories = new HashSet<>();
 
     public Film(){};
 
@@ -125,11 +131,21 @@ public class Film implements Serializable{
         this.actors = actors;
     }
 
+    public Set<Inventory> getFilmInventories() {
+        return filmInventories;
+    }
+
+    public void setFilmInventories(Set<Inventory> filmInventories) {
+        this.filmInventories = filmInventories;
+    }
+
     public void addCategory(Category category){
         categories.add(category);
         category.getFilms().add(this);
     }
 
+
+    //TODO удалить из репозитория кастомный скл
     public void removeCategory(Category category){
         this.categories.remove(category);
         category.getFilms().remove(this);
@@ -140,6 +156,8 @@ public class Film implements Serializable{
         actor.getFilms().add(this);
     }
 
+    //TODO удалить из репозитория кастомный скл.
+    //TODO использовать эти два метода
     public void removeActor(Actor actor){
         this.actors.remove(actor);
         actor.getFilms().remove(this);

@@ -1,4 +1,4 @@
-package pdm.persistence.web.controller;
+package pdm.persistence.web.controller.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
-import pdm.persistence.model.Category;
+import pdm.persistence.model.entity.Category;
 import pdm.persistence.model.dto.CategoryDTO;
 import pdm.persistence.model.repository.CategoryRepository;
 import pdm.persistence.model.repository.FilmRepository;

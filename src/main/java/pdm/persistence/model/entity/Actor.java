@@ -1,4 +1,4 @@
-package pdm.persistence.model;
+package pdm.persistence.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
