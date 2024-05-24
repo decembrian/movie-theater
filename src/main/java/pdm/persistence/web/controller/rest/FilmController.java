@@ -1,4 +1,4 @@
-package pdm.persistence.web.controller;
+package pdm.persistence.web.controller.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
